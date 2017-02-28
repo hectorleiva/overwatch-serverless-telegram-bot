@@ -1,0 +1,8 @@
+.env
+*.swp
+.serverless/
+.DS_Store
+
+# The compiled libraries
+vendored/*
+!vendored/.gitkeep

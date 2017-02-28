@@ -1,0 +1,5 @@
+python-telegram-bot==5.0
+python-dotenv
+requests
+boto3
+Pillow
