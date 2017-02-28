@@ -1,7 +1,7 @@
 # Overwatch Serverless Stats Bot
 ## (or how to not be afraid of using AWS Lambda + API Gateway + Serverless Framework with Python 2.7.13)
 
-![overwatch telegram stats bot demo]https://raw.githubusercontent.com/hectorleiva/overwatch-serverless-telegram-bot/master/overwatch-stats-bot-demo.gif
+![overwatch telegram stats bot demo](https://raw.githubusercontent.com/hectorleiva/overwatch-serverless-telegram-bot/master/overwatch-stats-bot-demo.gif)
 
 Ask the bot for your current rank information at [@owstatsbot](https://telegram.me/owstatsbot) on [Telegram](https://telegram.org/)
 
