@@ -1,6 +1,10 @@
 # Overwatch Serverless Stats Bot
 ## (or how to not be afraid of using AWS Lambda + API Gateway + Serverless Framework with Python 2.7.13)
 
+![overwatch telegram stats bot demo]https://raw.githubusercontent.com/hectorleiva/overwatch-serverless-telegram-bot/master/overwatch-stats-bot-demo.gif
+
+Ask the bot for your current rank information at [@owstatsbot](https://telegram.me/owstatsbot) on [Telegram](https://telegram.org/)
+
 This repo is a showcase of how to use these AWS services in order to generate a Overwatch stats bot for the messaging service Telegram.
 
 Special Thanks to the following repos for their resources and inspirations:
