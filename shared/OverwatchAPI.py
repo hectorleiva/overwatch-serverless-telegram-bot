@@ -1,14 +1,20 @@
+"""Class contacts that Overwatch API Server to return user information."""
+
+
 class OverwatchAPI:
+    """Contains all the methods and procedures to contact the Overwatch API."""
+
     def __init__(self, logger, requests, BadgeGenerator):
+        """Instatiate the necessary modules."""
         self.logger = logger
         self.OverwatchAPIDomain = 'https://owapi.net'
         self.requests = requests
         self.BadgeGenerator = BadgeGenerator(self.logger, self.requests)
-        self.regions = ['us', 'eu', 'any', 'kr'] # Supported regions from owapi.net
+        self.regions = ['us', 'eu', 'any', 'kr']  # Supported regions from owapi.net
         self.defaultRegion = 'us'
 
-    # Format prestige rating as stars after their current level
     def prestigeFormatting(self, prestigeLevel, currentLevel):
+        """Format prestige rating as stars after their current level."""
         prestigeSign = str(currentLevel)
         if prestigeLevel > 0:
             for i in range(prestigeLevel):
@@ -19,14 +25,18 @@ class OverwatchAPI:
 
     # args is the array of text passed from the user for their battle info
     def parseBattleInfoArgs(self, args):
+        """Parse the user's Battle.net information.
+
+        The args being an array of text passed from the user.
+        """
         battleInfo = dict()
 
         if len(args) == 1:
             # Access the only argument given, which should be their battletag
             info = args[0]
             """
-            The API can only take in '-' as the delimiter instead of the pound-sign
-            that is often used
+            The API can only take in '-' as the delimiter instead
+            of the pound-sign that is often used
             """
             if "#" in info:
                 battleInfo['battleTagOrg'] = info
@@ -41,8 +51,8 @@ class OverwatchAPI:
                 # Should be the username to search
                 if index == 0:
                     """
-                    The API can only take in '-' as the delimiter instead of the pound-sign
-                    that is often used
+                    The API can only take in '-' as the delimiter instead
+                    of the pound-sign that is often used
                     """
                     if "#" in info:
                         battleInfo['battleTagOrg'] = info
@@ -59,7 +69,10 @@ class OverwatchAPI:
         return battleInfo
 
     def htmlFormatBattleInfo(self, title, val):
-        # If there is no data returned for the specified stat information
+        """Format the passed title and value into html.
+
+        If there is no data returned for the specified stat information
+        """
         if not val:
             return ""
         else:
@@ -72,23 +85,28 @@ class OverwatchAPI:
         self.logger.info('args: %s', args)
 
         if not len(args):
-            msg = "Please enter your battletag, it should be something like `<your-name>#1234`\n"
-            msg += "The full command should be `/overwatch <your-name>#1234`. You can also add your region"
+            msg = "Please enter your battletag, " \
+                "it should be something like `<your-name>#1234`\n"
+            msg += "The full command should be `/overwatch <your-name>#1234`."\
+                " You can also add your region"
             msg += " like this: `/overwatch <your-name>#1234 us`"
             return bot.send_message(chat_id=update.message.chat_id,
-                text=msg,
-                parse_mode='Markdown')
+                                    text=msg,
+                                    parse_mode='Markdown')
 
         bot.send_message(chat_id=update.message.chat_id,
-                text="Ok, looking up the information, one moment...")
+                         text="Ok, looking up the information, one moment...")
 
         if len(args) > 2:
-            msg = "Sorry! I can only support at most 2 arguments. Your battletag `<your-name>#1234`"
-            msg += " and the region `us` or `eu`. the command should look like `<your-name>#1234"
+            msg = "Sorry! I can only support at most 2 arguments. " \
+                    "Your battletag `<your-name>#1234`"
+            msg += " and the region `us` or `eu`. the command should " \
+                "look like `<your-name>#1234"
             msg += " or like `<your-name>#1234 us`."
+
             return bot.send_message(chat_id=update.message.chat_id,
-                    text=msg,
-                    parse_mode='Markdown')
+                                    text=msg,
+                                    parse_mode='Markdown')
 
         battleInfo = self.parseBattleInfoArgs(args)
 
@@ -96,18 +114,22 @@ class OverwatchAPI:
 
         if battleInfo:
             if not battleInfo['battleTag']:
-                msg = "Please enter your battletag, it should be something like `<your-name>#1234`\n"
-                msg += "The full command should be `/overwatch <your-name>#1234`"
+                msg = "Please enter your battletag, it should be " \
+                    "something like `<your-name>#1234`\n"
+                msg += "The full command should be " \
+                    "`/overwatch <your-name>#1234`"
+
                 return bot.send_message(chat_id=update.message.chat_id,
-                    text=msg,
-                    parse_mode='Markdown')
+                                        text=msg,
+                                        parse_mode='Markdown')
 
             battleTagStr = str(battleInfo['battleTag'])
             requestUrl = "{apiDomain}/api/v3/u/{battleTag}/stats".format(
                 apiDomain=self.OverwatchAPIDomain,
                 battleTag=battleTagStr
             )
-            headers = { 'user-agent': "{botname}/0.1".format(botname=bot.name) }
+
+            headers = {'user-agent': "{botname}/0.1".format(botname=bot.name)}
 
             r = self.requests.get(requestUrl, headers=headers)
 
@@ -119,12 +141,14 @@ class OverwatchAPI:
                     gameStats = response[battleInfo['region']]['stats']
                     self.logger.info('Game Stats: %s', gameStats)
                     self.logger.info('attempting badge generator for {battleTag}'.format(
-                        battleTag=battleTagStr)
+                        battleTag=battleTagStr
+                    ))
+                    badge = self.BadgeGenerator.generateBadge(
+                        gameStats,
+                        battleTagStr
                     )
-                    badge = self.BadgeGenerator.generateBadge(gameStats, battleTagStr)
                     bot.send_photo(chat_id=update.message.chat_id,
-                        photo=badge
-                    )
+                                   photo=badge)
                 else:
                     bot.send_message(chat_id=update.message.chat_id,
                             text='Hmmm, the battletag does not exist. Battletags are case-sensitive and region specific. Please double-check that the battletag is correct!')

@@ -1,4 +1,5 @@
-import sys, os
+import sys
+import os
 from StringIO import StringIO
 from io import BytesIO
 from os.path import join, dirname
@@ -14,6 +15,7 @@ sys.path.append(os.path.join(here, "../shared"))
 
 # Now import the dependency libraries
 from PIL import Image, ImageDraw, ImageFont
+
 
 class BadgeGenerator:
     def __init__(self, logger, requests):
@@ -54,6 +56,11 @@ class BadgeGenerator:
         competitiveGameStats = gameStats['competitive']['game_stats']
         competitiveOverallStats = gameStats['competitive']['overall_stats']
 
+        if quickPlayOverallStats['tier'] is not None:
+            rank = quickPlayOverallStats['tier']
+        else:
+            rank = 'none'
+
         userData = {
             'quickplay': {
                 'wins': quickPlayOverallStats['wins'],
@@ -64,7 +71,7 @@ class BadgeGenerator:
                 'wins': competitiveOverallStats['wins'],
                 'losses': competitiveOverallStats['losses'],
                 'ties': competitiveOverallStats['ties'],
-                'rank': quickPlayOverallStats['tier'],
+                'rank': rank,
                 'win_rate': competitiveOverallStats['win_rate']
             },
         }
@@ -72,16 +79,15 @@ class BadgeGenerator:
         # 16:9 ratio = (640/360)
 
         # Base Values
-        baseSize = (640,360)
-        baseOpacity = (255, 255, 255, 0)
+        baseSize = (640, 360)
 
         # Manual Sizes
         thumbnailSize = (128, 128)
 
         # Fills
         fontFill = (255, 255, 255, 255)
-        greenFontFill = (18, 215, 53, 255) # green
-        redFontFill = (254, 78, 78, 255) #red
+        greenFontFill = (18, 215, 53, 255)  # green
+        redFontFill = (254, 78, 78, 255)  # red
 
         # Fonts
         fontSize = 45
@@ -109,13 +115,13 @@ class BadgeGenerator:
         compTiesPosX = (((fontDisplacement - 1) * ((len(str(userData['comp']['losses']))) + 3)) + compLossesStatsLoc[0])
         compTiesStatsLoc = self.move(
             (compTiesPosX,
-            fontSize+compTitleLocation[1])
+                fontSize + compTitleLocation[1])
         )
 
         winRatePosX = (fontDisplacement * (len(str(userData['comp']['ties'])) + 3) + compTiesPosX)
         winRateLoc = self.move(
             (winRatePosX,
-            fontSize+compTitleLocation[1]- 7)
+                fontSize + compTitleLocation[1] - 7)
         )
 
         winRateFontFill = greenFontFill if userData['comp']['win_rate'] > 50 else redFontFill
@@ -129,12 +135,13 @@ class BadgeGenerator:
         totalHoursPlayedLoc = self.move((10, fontSize+quickPlayKDLoc[1]))
 
         # The Base Image
-        base = Image.new('RGBA', baseSize, (153,17,153,255)) # Purple
+        base = Image.new('RGBA', baseSize, (153, 17, 153, 255))  # Purple
         # Generated Text
         txt = Image.new('RGBA', baseSize, (0, 0, 0, 0))
 
         # Avatar
-        avatarResponse = self.requests.get(quickPlayOverallStats['avatar']) # Retrieve their avatar from Battlenet
+        # Retrieve their avatar from Battlenet
+        avatarResponse = self.requests.get(quickPlayOverallStats['avatar'])
         avatar = Image.open(StringIO(avatarResponse.content))
         avatar.thumbnail(thumbnailSize)
         avatar_pos = self.move((-10, 10), 'right', base, avatar)
@@ -233,10 +240,10 @@ class BadgeGenerator:
         badge.paste(avatar, avatar_pos)
 
         # Rank placed on composite base + avatar image
-        badge.paste(rank, rank_pos, rank) # Rank is used twice so that it can mask itself
+        badge.paste(rank, rank_pos, rank)  # Rank is used twice so that it can mask itself
 
         # Generate and save the image in memory and return the raw image data in PNG format
-        temp = BytesIO() # File object
+        temp = BytesIO()  # File object
         badge.save(temp, format="jpeg")
         temp.seek(0)
         return temp
