@@ -92,3 +92,9 @@ There is one big issue with this repo and its implementation for AWS Lambda, and
 A suggestion from me-to-you is to [use Docker and the amazonlinux container to mount your work directory and pip install from within there](https://hub.docker.com/_/amazonlinux/) and proceed to deploy from your local machine via `serverless deploy`.
 
 I know that this is a roundabout way to get the binaries to work on Lambda, but I think that this works better than spinning up an EC2 instance to generate and then copy binaries back - but that's how I did it.
+
+---
+
+License
+
+See the LICENSE.txt file for license rights and limitations (MIT).
